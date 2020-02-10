@@ -1,0 +1,25 @@
+﻿<Window x:Class="FilteredDataGridProject.MainWindowView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FilteredDataGridProject"
+             WindowStartupLocation="CenterScreen"
+             Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <local:FilteredDataGridProject  ItemsSource="{Binding Personen}" SelectedItem="{Binding SelectedItemPerson}" >
+
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Width="500"
+                    Binding="{Binding Vorname, Mode=OneWay, ValidatesOnNotifyDataErrors=False}"
+                    Header="Vorname"
+                    HeaderTemplate="{StaticResource DataGridHeaderFilter}"
+                    SortDirection="Ascending" />
+                <DataGridTextColumn
+                    Width="*"
+                    Binding="{Binding Nachname, Mode=OneWay, ValidatesOnNotifyDataErrors=False}"
+                    Header="Nachname"
+                    HeaderTemplate="{StaticResource DataGridHeaderFilter}" />
+            </DataGrid.Columns>
+        </local:FilteredDataGridProject>
+    </Grid>
+</Window>

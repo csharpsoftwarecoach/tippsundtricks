@@ -1,9 +1,212 @@
 ﻿<Application x:Class="FilteredDataGrid.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:FilteredDataGrid"
-             StartupUri="MainWindow.xaml">
+             xmlns:controls="clr-namespace:FilteredDataGridProject"
+             StartupUri="MainWindowView.xaml">
     <Application.Resources>
-         
+
+
+        <!--  Header-DataTemplate für das DataGrid: Header + Filterzeile  -->
+        <DataTemplate x:Key="DataGridHeaderFilter">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                Grid.Row="0"
+                HorizontalAlignment="Center"
+                Text="{Binding Content, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                <TextBox Grid.Row="1" />
+            </Grid>
+        </DataTemplate>
+
+        
+        <!--  DataGridColumnHeader  -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+
+        <!--  DataGrid mit StatusBar  -->
+        <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="SelectionMode" Value="Single" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="CanUserAddRows" Value="False" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="CanUserDeleteRows" Value="False" />
+            <Setter Property="CanUserSortColumns" Value="True" />
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="GridLinesVisibility" Value="All" />
+            <Setter Property="AlternationCount" Value="2" />
+            <Setter Property="RowDetailsVisibilityMode" Value="VisibleWhenSelected" />
+            <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
+            <Setter Property="ScrollViewer.PanningMode" Value="Both" />
+            <Setter Property="Stylus.IsFlicksEnabled" Value="False" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGrid}">
+                        <Border
+                        x:Name="border"
+                        Padding="{TemplateBinding Padding}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        SnapsToDevicePixels="True">
+                            <Border.Background>
+                                <SolidColorBrush Color="{TemplateBinding Background}" />
+                            </Border.Background>
+                            <ScrollViewer
+                            x:Name="DG_ScrollViewer"
+                            Background="Black"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="0"
+                            Focusable="False"
+                            Foreground="{TemplateBinding BorderBrush}">
+                                <ScrollViewer.Template>
+                                    <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <!--  Button für die Selektion aller Daten  -->
+                                            <Button
+                                            Width="{Binding CellsPanelHorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                            Command="{x:Static DataGrid.SelectAllCommand}"
+                                            Focusable="false"
+                                            Style="{DynamicResource {ComponentResourceKey ResourceId=DataGridSelectAllButtonStyle,
+                                                                                          TypeInTargetAssembly={x:Type DataGrid}}}"
+                                            Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.All}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
+
+                                            <!--  Header  -->
+                                            <DataGridColumnHeadersPresenter
+                                            x:Name="PART_ColumnHeadersPresenter"
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.Column}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
+
+                                            <!--  Dateninhalt  -->
+                                            <ScrollContentPresenter
+                                            x:Name="PART_ScrollContentPresenter"
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="2"
+                                            CanContentScroll="{TemplateBinding CanContentScroll}" />
+
+                                            <Border
+                                            Grid.Row="0"
+                                            Grid.RowSpan="2"
+                                            Grid.Column="2"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="0"
+                                            Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}">
+                                                <ScrollBar
+                                                x:Name="PART_VerticalScrollBar"
+                                                Maximum="{TemplateBinding ScrollableHeight}"
+                                                Orientation="Vertical"
+                                                ViewportSize="{TemplateBinding ViewportHeight}"
+                                                Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                                Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                                            </Border>
+
+                                            <Grid
+                                            Grid.Row="2"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="{Binding NonFrozenColumnsViewportHorizontalOffset, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Border
+                                                Grid.Column="1"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="0"
+                                                Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}">
+                                                    <ScrollBar
+                                                    x:Name="PART_HorizontalScrollBar"
+                                                    Maximum="{TemplateBinding ScrollableWidth}"
+                                                    Orientation="Horizontal"
+                                                    ViewportSize="{TemplateBinding ViewportWidth}"
+                                                    Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
+                                                    Value="{Binding HorizontalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                                                </Border>
+                                            </Grid>
+
+                                            <!--  Statusbar: Anzeige für die Anzahl der Datensätze, sowie selektierte Datensätze  -->
+                                            <Border
+                                            Grid.Row="3"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="3"
+                                            Height="30"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Top"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="0,1,0,0"
+                                            SnapsToDevicePixels="True">
+                                                <StackPanel
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                
+                                                Orientation="Horizontal">
+                                                    <Label Width="10" Padding="0,2" />
+                                                    <Label
+                                                    Padding="0,2"
+                                                    VerticalAlignment="Center"
+                                                    Content="Selektiert: "
+                                                    Foreground="{TemplateBinding Foreground}" />
+                                                    <Label
+                                                    Padding="0,2"
+                                                    VerticalAlignment="Center"
+                                                    Content="{Binding Path=SelectedItems.Count, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
+                                                    Foreground="{TemplateBinding Foreground}" />
+                                                    <Label
+                                                    Width="40"
+                                                    Padding="0,2"
+                                                    HorizontalAlignment="Right" />
+                                                    <Label
+                                                    Padding="0,2"
+                                                    VerticalAlignment="Center"
+                                                    Content="Anzahl: "
+                                                    Foreground="{TemplateBinding Foreground}" />
+                                                    <Label
+                                                    Padding="0,2"
+                                                    VerticalAlignment="Center"
+                                                    Content="{Binding Path=Items.Count, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}}"
+                                                    Foreground="{TemplateBinding Foreground}" />
+                                                </StackPanel>
+                                            </Border>
+
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ScrollViewer.Template>
+                                <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsGrouping" Value="true">
+                    <Setter Property="ScrollViewer.CanContentScroll" Value="false" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        
+        
     </Application.Resources>
 </Application>
